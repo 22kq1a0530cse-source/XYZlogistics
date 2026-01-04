@@ -1,35 +1,18 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const driverData = {
-  D001: {
-    name: "Ravi",
-    license: "DL12345",
-    totalTrips: 120,
-    kilometers: 32000,
-    hours: 1800,
-    performance: 85,
-    overspeed: 2,
-    attendance: "92%",
-    salary: "₹35,000"
-  },
-  D002: {
-    name: "Kumar",
-    license: "DL67890",
-    totalTrips: 78,
-    kilometers: 21000,
-    hours: 1200,
-    performance: 70,
-    overspeed: 5,
-    attendance: "85%",
-    salary: "₹28,000"
-  }
-};
+import { api } from "../services/api";
 
 export default function DriverDetail() {
   const { driverId } = useParams();
-  const driver = driverData[driverId];
+  const [driver, setDriver] = useState(null);
 
-  if (!driver) return <h3>Driver not found</h3>;
+  useEffect(() => {
+    api.get(`/drivers/${driverId}`)
+      .then(res => setDriver(res.data))
+      .catch(err => console.error(err));
+  }, [driverId]);
+
+  if (!driver) return <h3>Loading driver details...</h3>;
 
   return (
     <>
@@ -39,35 +22,35 @@ export default function DriverDetail() {
       <div style={cardStyle}>
         <h3>Basic Information</h3>
         <p><b>Name:</b> {driver.name}</p>
-        <p><b>License No:</b> {driver.license}</p>
+        <p><b>License No:</b> {driver.license_no}</p>
       </div>
 
       {/* Trip Summary */}
       <div style={cardStyle}>
         <h3>Trip Summary</h3>
-        <p><b>Total Trips:</b> {driver.totalTrips}</p>
-        <p><b>Kilometers Travelled:</b> {driver.kilometers}</p>
-        <p><b>Hours Driven:</b> {driver.hours}</p>
+        <p><b>Total Trips:</b> {driver.totalTrips || 0}</p>
+        <p><b>Kilometers Travelled:</b> {driver.kilometers || 0}</p>
+        <p><b>Hours Driven:</b> {driver.hours || 0}</p>
       </div>
 
       {/* Performance & Safety */}
       <div style={cardStyle}>
         <h3>Performance & Safety</h3>
-        <p><b>Performance Score:</b> {driver.performance}</p>
-        <p><b>Over-speed Alerts:</b> {driver.overspeed}</p>
+        <p><b>Performance Score:</b> {driver.performance || "—"}</p>
+        <p><b>Over-speed Alerts:</b> {driver.overspeed || 0}</p>
       </div>
 
       {/* Attendance & Salary */}
       <div style={cardStyle}>
         <h3>Attendance & Salary</h3>
-        <p><b>Attendance:</b> {driver.attendance}</p>
-        <p><b>Salary:</b> {driver.salary}</p>
+        <p><b>Attendance:</b> {driver.attendance || "—"}</p>
+        <p><b>Salary:</b> {driver.salary ? `₹${driver.salary}` : "—"}</p>
       </div>
     </>
   );
 }
 
-/* ----- styles ----- */
+/* ----- styles (UNCHANGED) ----- */
 
 const cardStyle = {
   border: "1px solid #e5e7eb",

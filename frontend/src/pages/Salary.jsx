@@ -1,23 +1,30 @@
-const salaryData = [
-  {
-    driver_id: "D001",
-    name: "Ravi",
-    trips: 120,
-    distance: "32,000 km",
-    salary: "₹35,000",
-    status: "Paid"
-  },
-  {
-    driver_id: "D002",
-    name: "Kumar",
-    trips: 78,
-    distance: "21,000 km",
-    salary: "₹28,000",
-    status: "Pending"
-  }
-];
+import { useEffect, useState } from "react";
+import { api } from "../services/api";
 
 export default function Salary() {
+  const [salaryData, setSalaryData] = useState([]);
+
+  useEffect(() => {
+    // For now, demo with one driver
+    api.get("/salary/D001")
+      .then(res => {
+        const d = res.data;
+
+        // Convert backend response into table format
+        setSalaryData([
+          {
+            driver_id: d.driver_id,
+            name: "Ravi", // can be fetched later from driver API
+            trips: d.total_trips,
+            distance: `${d.total_distance} km`,
+            salary: `₹${d.salary}`,
+            status: "Paid" // demo status (can be dynamic later)
+          }
+        ]);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <>
       <h2>Driver Salary & Payments</h2>
@@ -59,7 +66,20 @@ export default function Salary() {
   );
 }
 
-/* styles */
-const tableStyle = { width: "100%", borderCollapse: "collapse", marginTop: "20px" };
-const thStyle = { border: "1px solid #ccc", padding: "10px", background: "#f1f5f9" };
-const tdStyle = { border: "1px solid #ccc", padding: "10px" };
+/* styles (UNCHANGED) */
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: "20px"
+};
+
+const thStyle = {
+  border: "1px solid #ccc",
+  padding: "10px",
+  background: "#f1f5f9"
+};
+
+const tdStyle = {
+  border: "1px solid #ccc",
+  padding: "10px"
+};

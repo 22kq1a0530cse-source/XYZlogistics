@@ -1,34 +1,19 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const tripData = {
-  T001: {
-    trip_id: "T001",
-    truck_no: "AP09AB1234",
-    driver_id: "D001",
-    distance: "350 km",
-    duration: "6 hrs",
-    overspeed: "No",
-    avgSpeed: "58 km/h",
-    remarks: "Safe driving"
-  },
-  T002: {
-    trip_id: "T002",
-    truck_no: "TS10CD5678",
-    driver_id: "D002",
-    distance: "280 km",
-    duration: "5 hrs",
-    overspeed: "Yes",
-    avgSpeed: "72 km/h",
-    remarks: "Over-speed detected"
-  }
-};
+import { api } from "../services/api";
 
 export default function TripDetail() {
   const { tripId } = useParams();
-  const trip = tripData[tripId];
+  const [trip, setTrip] = useState(null);
+
+  useEffect(() => {
+    api.get(`/trips/${tripId}`)
+      .then(res => setTrip(res.data))
+      .catch(err => console.error(err));
+  }, [tripId]);
 
   if (!trip) {
-    return <h3>Trip not found</h3>;
+    return <h3>Loading trip details...</h3>;
   }
 
   return (
@@ -42,20 +27,20 @@ export default function TripDetail() {
       </div>
 
       <div style={card}>
-        <p><b>Distance:</b> {trip.distance}</p>
-        <p><b>Duration:</b> {trip.duration}</p>
-        <p><b>Average Speed:</b> {trip.avgSpeed}</p>
+        <p><b>Distance:</b> {trip.distance_km} km</p>
+        <p><b>Duration:</b> {trip.duration_hours} hrs</p>
+        <p><b>Average Speed:</b> {trip.avg_speed || "—"} km/h</p>
       </div>
 
       <div style={card}>
-        <p><b>Over-speed:</b> {trip.overspeed}</p>
-        <p><b>Remarks:</b> {trip.remarks}</p>
+        <p><b>Over-speed:</b> {trip.overspeed ? "Yes" : "No"}</p>
+        <p><b>Remarks:</b> {trip.remarks || "—"}</p>
       </div>
     </>
   );
 }
 
-/* ---------- styles ---------- */
+/* ---------- styles (UNCHANGED) ---------- */
 
 const card = {
   border: "1px solid #e5e7eb",

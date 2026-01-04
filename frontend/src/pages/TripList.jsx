@@ -1,26 +1,16 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const trips = [
-  {
-    trip_id: "T001",
-    truck_no: "AP09AB1234",
-    driver_id: "D001",
-    distance: "350 km",
-    duration: "6 hrs",
-    overspeed: "No"
-  },
-  {
-    trip_id: "T002",
-    truck_no: "TS10CD5678",
-    driver_id: "D002",
-    distance: "280 km",
-    duration: "5 hrs",
-    overspeed: "Yes"
-  }
-];
+import { api } from "../services/api";
 
 export default function TripList() {
+  const [trips, setTrips] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get("/trips")
+      .then(res => setTrips(res.data))
+      .catch(err => console.error(err));
+  }, []);
 
   return (
     <>
@@ -48,9 +38,9 @@ export default function TripList() {
               <td style={tdStyle}>{trip.trip_id}</td>
               <td style={tdStyle}>{trip.truck_no}</td>
               <td style={tdStyle}>{trip.driver_id}</td>
-              <td style={tdStyle}>{trip.distance}</td>
-              <td style={tdStyle}>{trip.duration}</td>
-              <td style={tdStyle}>{trip.overspeed}</td>
+              <td style={tdStyle}>{trip.distance_km} km</td>
+              <td style={tdStyle}>{trip.duration_hours} hrs</td>
+              <td style={tdStyle}>{trip.overspeed ? "Yes" : "No"}</td>
             </tr>
           ))}
         </tbody>
@@ -59,7 +49,7 @@ export default function TripList() {
   );
 }
 
-/* ---------- styles ---------- */
+/* ---------- styles (UNCHANGED) ---------- */
 
 const tableStyle = {
   width: "100%",

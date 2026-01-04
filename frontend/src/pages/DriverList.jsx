@@ -1,24 +1,16 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const drivers = [
-  {
-    driver_id: "D001",
-    license: "DL12345",
-    trips: 120,
-    overspeed: 2,
-    remarks: "Good"
-  },
-  {
-    driver_id: "D002",
-    license: "DL67890",
-    trips: 78,
-    overspeed: 5,
-    remarks: "Average"
-  }
-];
+import { api } from "../services/api";
 
 export default function DriverList() {
+  const [drivers, setDrivers] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get("/drivers")
+      .then(res => setDrivers(res.data))
+      .catch(err => console.error(err));
+  }, []);
 
   return (
     <>
@@ -43,10 +35,10 @@ export default function DriverList() {
               onClick={() => navigate(`/drivers/${driver.driver_id}`)}
             >
               <td style={tdStyle}>{driver.driver_id}</td>
-              <td style={tdStyle}>{driver.license}</td>
-              <td style={tdStyle}>{driver.trips}</td>
-              <td style={tdStyle}>{driver.overspeed}</td>
-              <td style={tdStyle}>{driver.remarks}</td>
+              <td style={tdStyle}>{driver.license_no}</td>
+              <td style={tdStyle}>{driver.trips || 0}</td>
+              <td style={tdStyle}>{driver.overspeed || 0}</td>
+              <td style={tdStyle}>{driver.remarks || "—"}</td>
             </tr>
           ))}
         </tbody>
@@ -55,7 +47,7 @@ export default function DriverList() {
   );
 }
 
-/* ---- styles ---- */
+/* ---- styles (UNCHANGED) ---- */
 
 const tableStyle = {
   width: "100%",
