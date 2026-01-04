@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 
 export default function Sidebar() {
+  const role = localStorage.getItem("role");
+
   return (
     <div style={sidebarStyle}>
       <h3>XYZ Logistics</h3>
@@ -11,9 +13,16 @@ export default function Sidebar() {
       <Link to="/safety" style={linkStyle}>Safety Dashboard</Link>
       <Link to="/attendance" style={linkStyle}>Attendance</Link>
       <Link to="/salary" style={linkStyle}>Salary & Payments</Link>
+
+      {/* Admin badge (optional visual feedback) */}
+      {role === "admin" && (
+        <p style={adminBadge}>ADMIN MODE</p>
+      )}
     </div>
   );
 }
+
+/* styles (UNCHANGED) */
 
 const sidebarStyle = {
   width: "220px",
@@ -28,4 +37,10 @@ const linkStyle = {
   color: "white",
   textDecoration: "none",
   margin: "10px 0"
+};
+
+const adminBadge = {
+  marginTop: "20px",
+  fontSize: "12px",
+  color: "#38bdf8"
 };

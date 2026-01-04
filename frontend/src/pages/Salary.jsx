@@ -1,24 +1,35 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function Salary() {
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+  const navigate = useNavigate();
+
   const [salaryData, setSalaryData] = useState([]);
 
+  // 🔐 block guest access
   useEffect(() => {
-    // For now, demo with one driver
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
+
+  useEffect(() => {
+    // Demo salary (backend later)
     api.get("/salary/D001")
       .then(res => {
         const d = res.data;
 
-        // Convert backend response into table format
         setSalaryData([
           {
             driver_id: d.driver_id,
-            name: "Ravi", // can be fetched later from driver API
+            name: "Ravi",
             trips: d.total_trips,
             distance: `${d.total_distance} km`,
             salary: `₹${d.salary}`,
-            status: "Paid" // demo status (can be dynamic later)
+            status: "Paid"
           }
         ]);
       })
@@ -38,6 +49,7 @@ export default function Salary() {
             <th style={thStyle}>Distance</th>
             <th style={thStyle}>Salary</th>
             <th style={thStyle}>Payment Status</th>
+            {isAdmin && <th style={thStyle}>Action</th>}
           </tr>
         </thead>
 
@@ -58,6 +70,18 @@ export default function Salary() {
               >
                 {s.status}
               </td>
+
+              {/* 🔐 ADMIN ONLY */}
+              {isAdmin && (
+                <td style={tdStyle}>
+                  <button
+                    style={payBtn}
+                    onClick={() => alert("Mark Paid (STEP-7 backend)")}
+                  >
+                    Mark Paid
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -67,6 +91,7 @@ export default function Salary() {
 }
 
 /* styles (UNCHANGED) */
+
 const tableStyle = {
   width: "100%",
   borderCollapse: "collapse",
@@ -82,4 +107,13 @@ const thStyle = {
 const tdStyle = {
   border: "1px solid #ccc",
   padding: "10px"
+};
+
+const payBtn = {
+  background: "#16a34a",
+  color: "#fff",
+  border: "none",
+  padding: "6px 12px",
+  borderRadius: "5px",
+  cursor: "pointer"
 };

@@ -2,11 +2,9 @@ import { Link } from "react-router-dom";
 import heroImg from "./assets/hero.png";
 
 export default function Home() {
-  // ✅ ADDED (necessary)
   const role = localStorage.getItem("role");
   const username = localStorage.getItem("username");
 
-  // ✅ FIXED (return must be on same line)
   return (
     <div style={page}>
 
@@ -18,7 +16,6 @@ export default function Home() {
           {/* ===== BEFORE LOGIN ===== */}
           {!role && (
             <>
-              {/* Login */}
               <Link
                 to="/login"
                 style={navLink}
@@ -28,7 +25,6 @@ export default function Home() {
                 Login
               </Link>
 
-              {/* Register */}
               <Link
                 to="/register"
                 style={navLink}
@@ -38,32 +34,28 @@ export default function Home() {
                 Register
               </Link>
 
-              {/* Admin */}
               <Link to="/admin-login" style={navBtn}>
                 Admin
               </Link>
             </>
           )}
 
-          {/* ===== AFTER LOGIN (USER / ADMIN) ===== */}
+          {/* ===== AFTER LOGIN ===== */}
           {role && (
             <div style={userBox}>
               <span style={userText}>
                 👤 {username} {role === "admin" && "(Admin)"}
               </span>
 
-              {/* Admin dashboard link */}
-              {role === "admin" && (
-                <Link to="/trucks" style={navBtn}>
-                  Dashboard
-                </Link>
-              )}
+              {/* Dashboard for BOTH user & admin */}
+              <Link to="/trucks" style={navBtn}>
+                Dashboard
+              </Link>
 
               <button
                 style={logoutBtn}
                 onClick={() => {
-                  localStorage.removeItem("role");
-                  localStorage.removeItem("username");
+                  localStorage.clear();
                   window.location.href = "/";
                 }}
               >
@@ -82,14 +74,22 @@ export default function Home() {
           <h1 style={heroTitle}>
             We Manage Transport <br /> with Precision & Care
           </h1>
+
           <p style={heroText}>
             A complete logistics management platform for
             fleet, drivers, trips, safety and payroll.
           </p>
 
-          <Link to="/register" style={primaryBtn}>
-            Get Started
-          </Link>
+          {/* GET STARTED LOGIC */}
+          {!role ? (
+            <Link to="/register" style={primaryBtn}>
+              Get Started
+            </Link>
+          ) : (
+            <Link to="/trucks" style={primaryBtn}>
+              Go to Dashboard
+            </Link>
+          )}
         </div>
       </section>
 
@@ -105,59 +105,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* LOGISTICS INFO */}
-      <section style={{ ...section, background: "#f8fafc" }}>
-        <div style={twoCol}>
-          <div>
-            <h2 style={sectionTitle}>Comprehensive Logistics</h2>
-            <p style={text}>
-              We help transport companies digitize operations,
-              reduce manual work and increase safety through
-              smart logistics software.
-            </p>
-
-            <ul style={list}>
-              <li>✔ Live vehicle tracking</li>
-              <li>✔ Driver optimization</li>
-              <li>✔ Attendance & salary</li>
-              <li>✔ Safety monitoring</li>
-            </ul>
-          </div>
-
-          <img
-            src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"
-            alt="truck"
-            style={image}
-          />
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section style={stats}>
-        <Stat value="145+" label="Branches" />
-        <Stat value="60+" label="Vehicles" />
-        <Stat value="5,200+" label="Drivers" />
-      </section>
-
-      {/* CTA */}
-      <section style={cta}>
-        <h2>Experience the Future of Logistics</h2>
-        <Link to="/register" style={primaryBtn}>
-          Request a Demo
-        </Link>
-      </section>
-
       {/* FOOTER */}
       <footer style={footer}>
         © 2026 XYZ Logistics. All rights reserved.
       </footer>
-
     </div>
   );
 }
 
 /* COMPONENTS */
-
 function Feature({ title, icon }) {
   return (
     <div style={featureCard}>
@@ -166,15 +122,6 @@ function Feature({ title, icon }) {
       <p style={{ fontSize: "14px", color: "#475569" }}>
         Reliable and scalable logistics solutions for modern businesses.
       </p>
-    </div>
-  );
-}
-
-function Stat({ value, label }) {
-  return (
-    <div>
-      <h2>{value}</h2>
-      <p>{label}</p>
     </div>
   );
 }
@@ -284,8 +231,6 @@ const primaryBtn = {
   textDecoration: "none",
   fontWeight: "700"
 };
-
-/* (rest of your styles remain unchanged) */
 
 
 /* SECTIONS */

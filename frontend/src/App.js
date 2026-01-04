@@ -7,7 +7,8 @@ export default function App() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* Sidebar only for admin */}
-      {role === "admin" && <Sidebar />}
+      {(role === "admin" || role === "user") && <Sidebar />}
+
 
       <div style={{ flex: 1, padding: "20px", background: "#f8fafc" }}>
         <AppRoutes />

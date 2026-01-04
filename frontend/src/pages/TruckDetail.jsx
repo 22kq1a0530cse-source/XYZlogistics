@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const truckData = {
@@ -24,9 +24,20 @@ const truckData = {
 
 export default function TruckDetail() {
   const { truckNo } = useParams();
+  const navigate = useNavigate();
+
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
   const [tab, setTab] = useState("overview");
+  const [editMode, setEditMode] = useState(false);
 
   const truck = truckData[truckNo];
+
+  if (!role) {
+    navigate("/");
+    return null;
+  }
 
   if (!truck) {
     return <h3>Truck not found</h3>;
@@ -34,53 +45,85 @@ export default function TruckDetail() {
 
   return (
     <>
-      <h2>Truck Details</h2>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h2>Truck Details</h2>
+
+        {/* ADMIN ONLY */}
+       {isAdmin && (
+  <div style={{ marginBottom: "15px" }}>
+    <button style={editBtn}>Edit Truck</button>
+    <button style={deleteBtn}>Delete Truck</button>
+  </div>
+)}
+
+      </div>
 
       {/* Tabs */}
       <div style={tabBar}>
-        <button
-          style={tabBtn(tab === "overview")}
-          onClick={() => setTab("overview")}
-        >
+        <button style={tabBtn(tab === "overview")} onClick={() => setTab("overview")}>
           Overview
         </button>
-
-        <button
-          style={tabBtn(tab === "documents")}
-          onClick={() => setTab("documents")}
-        >
+        <button style={tabBtn(tab === "documents")} onClick={() => setTab("documents")}>
           Documents
         </button>
-
-        <button
-          style={tabBtn(tab === "trips")}
-          onClick={() => setTab("trips")}
-        >
+        <button style={tabBtn(tab === "trips")} onClick={() => setTab("trips")}>
           Trips
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* OVERVIEW */}
       {tab === "overview" && (
         <div style={card}>
           <p><b>Truck No:</b> {truck.truck_no}</p>
-          <p><b>Driver Assigned:</b> {truck.driver}</p>
-          <p><b>Safety Bucket:</b> {truck.safety}</p>
+
+          <p>
+            <b>Driver Assigned:</b>{" "}
+            {editMode ? <input defaultValue={truck.driver} /> : truck.driver}
+          </p>
+
+          <p>
+            <b>Safety Bucket:</b>{" "}
+            {editMode ? (
+              <select defaultValue={truck.safety}>
+                <option>Green</option>
+                <option>Yellow</option>
+                <option>Red</option>
+              </select>
+            ) : (
+              truck.safety
+            )}
+          </p>
         </div>
       )}
 
+      {/* DOCUMENTS */}
       {tab === "documents" && (
         <div style={card}>
-          <p><b>Pollution Certificate:</b> {truck.pollution}</p>
-          <p><b>RC Status:</b> {truck.rc}</p>
+          <p>
+            <b>Pollution Certificate:</b>{" "}
+            {editMode ? <input defaultValue={truck.pollution} /> : truck.pollution}
+          </p>
+
+          <p>
+            <b>RC Status:</b>{" "}
+            {editMode ? <input defaultValue={truck.rc} /> : truck.rc}
+          </p>
         </div>
       )}
 
+      {/* TRIPS */}
       {tab === "trips" && (
         <div style={card}>
           <p><b>Total Trips:</b> {truck.trips}</p>
           <p><b>Total Distance Covered:</b> {truck.totalDistance}</p>
         </div>
+      )}
+
+      {/* ADMIN SAVE */}
+      {isAdmin && editMode && (
+        <button style={saveBtn} onClick={() => alert("Save API next step")}>
+          Save Changes
+        </button>
       )}
     </>
   );
@@ -108,4 +151,23 @@ const card = {
   padding: "15px",
   borderRadius: "8px",
   backgroundColor: "#ffffff"
+};
+
+const editBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "6px 12px",
+  borderRadius: "6px",
+  cursor: "pointer"
+};
+
+const saveBtn = {
+  marginTop: "15px",
+  background: "#16a34a",
+  color: "#fff",
+  border: "none",
+  padding: "10px 16px",
+  borderRadius: "6px",
+  cursor: "pointer"
 };

@@ -7,16 +7,20 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const handleLogin = () => {
+    setError("");
+
     api
       .post("/login", { username, password })
-      .then(() => {
-        localStorage.setItem("role", "user");
-localStorage.setItem("username", username);
-window.location.href = "/";
-
+      .then((res) => {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("role", res.data.role);
+        localStorage.setItem("username", res.data.username);
+        window.location.href = "/";
       })
-      .catch(() => setError("Invalid username or password"));
-  };
+      .catch(() => {
+        setError("Invalid username or password");
+      });
+  }; // ✅ THIS WAS MISSING
 
   return (
     <div style={page}>
@@ -67,7 +71,6 @@ window.location.href = "/";
     </div>
   );
 }
-
 
 /* ===================== STYLES ===================== */
 

@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function DriverDetail() {
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
   const { driverId } = useParams();
+  const navigate = useNavigate();
   const [driver, setDriver] = useState(null);
+
+  // 🔐 Block guest access
+  useEffect(() => {
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     api.get(`/drivers/${driverId}`)
@@ -17,6 +28,14 @@ export default function DriverDetail() {
   return (
     <>
       <h2>Driver Details</h2>
+
+      {/* 🔐 ADMIN CONTROLS (UI placeholder) */}
+      {isAdmin && (
+        <div style={adminBar}>
+          <button style={editBtn}>Edit Driver</button>
+          <button style={deleteBtn}>Delete Driver</button>
+        </div>
+      )}
 
       {/* Basic Info */}
       <div style={cardStyle}>
@@ -58,4 +77,29 @@ const cardStyle = {
   borderRadius: "8px",
   marginTop: "15px",
   backgroundColor: "#ffffff"
+};
+
+/* admin ui (new but isolated) */
+const adminBar = {
+  display: "flex",
+  gap: "10px",
+  marginBottom: "10px"
+};
+
+const editBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "8px 14px",
+  borderRadius: "6px",
+  cursor: "pointer"
+};
+
+const deleteBtn = {
+  background: "#dc2626",
+  color: "#fff",
+  border: "none",
+  padding: "8px 14px",
+  borderRadius: "6px",
+  cursor: "pointer"
 };

@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 const attendanceData = [
   { driver_id: "D001", name: "Ravi", presentDays: 26, absentDays: 4 },
   { driver_id: "D002", name: "Kumar", presentDays: 22, absentDays: 8 },
@@ -5,9 +8,27 @@ const attendanceData = [
 ];
 
 export default function Attendance() {
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+  const navigate = useNavigate();
+
+  // 🔐 Block guest access
+  useEffect(() => {
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
+
   return (
     <>
       <h2>Driver Attendance</h2>
+
+      {/* 🔐 ADMIN CONTROLS (future use) */}
+      {isAdmin && (
+        <div style={adminBar}>
+          <button style={editBtn}>Edit Attendance</button>
+        </div>
+      )}
 
       <table style={tableStyle}>
         <thead>
@@ -33,7 +54,34 @@ export default function Attendance() {
   );
 }
 
-/* styles */
-const tableStyle = { width: "100%", borderCollapse: "collapse", marginTop: "20px" };
-const thStyle = { border: "1px solid #ccc", padding: "10px", background: "#f1f5f9" };
-const tdStyle = { border: "1px solid #ccc", padding: "10px" };
+/* styles (UNCHANGED) */
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: "20px"
+};
+
+const thStyle = {
+  border: "1px solid #ccc",
+  padding: "10px",
+  background: "#f1f5f9"
+};
+
+const tdStyle = {
+  border: "1px solid #ccc",
+  padding: "10px"
+};
+
+/* admin UI (isolated) */
+const adminBar = {
+  marginBottom: "10px"
+};
+
+const editBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "8px 14px",
+  borderRadius: "6px",
+  cursor: "pointer"
+};

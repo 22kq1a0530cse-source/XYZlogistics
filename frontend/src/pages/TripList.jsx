@@ -3,8 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function TripList() {
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
   const [trips, setTrips] = useState([]);
   const navigate = useNavigate();
+
+  // 🔐 block guest access
+  useEffect(() => {
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     api.get("/trips")
@@ -14,7 +24,19 @@ export default function TripList() {
 
   return (
     <>
-      <h2>Trip List</h2>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h2>Trip List</h2>
+
+        {/* ADMIN ONLY */}
+        {isAdmin && (
+          <button
+            style={addBtn}
+            onClick={() => alert("Add Trip (Step-6 backend)")}
+          >
+            + Add Trip
+          </button>
+        )}
+      </div>
 
       <table style={tableStyle}>
         <thead>
@@ -71,5 +93,14 @@ const tdStyle = {
 };
 
 const trStyle = {
+  cursor: "pointer"
+};
+
+const addBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "8px 14px",
+  borderRadius: "6px",
   cursor: "pointer"
 };

@@ -3,8 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function DriverList() {
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
   const [drivers, setDrivers] = useState([]);
   const navigate = useNavigate();
+
+  // 🔐 block guest access
+  useEffect(() => {
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     api.get("/drivers")
@@ -15,6 +25,13 @@ export default function DriverList() {
   return (
     <>
       <h2>Driver List</h2>
+
+      {/* 🔐 ADMIN ONLY (UI placeholder) */}
+      {isAdmin && (
+        <button style={addBtn} onClick={() => alert("Add Driver (STEP-8)")}>
+          + Add Driver
+        </button>
+      )}
 
       <table style={tableStyle}>
         <thead>
@@ -68,5 +85,15 @@ const tdStyle = {
 };
 
 const trStyle = {
+  cursor: "pointer"
+};
+
+const addBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "8px 14px",
+  borderRadius: "6px",
+  marginBottom: "10px",
   cursor: "pointer"
 };

@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function TripDetail() {
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
   const { tripId } = useParams();
+  const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
+
+  // 🔐 block guest
+  useEffect(() => {
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     api.get(`/trips/${tripId}`)
@@ -36,6 +47,19 @@ export default function TripDetail() {
         <p><b>Over-speed:</b> {trip.overspeed ? "Yes" : "No"}</p>
         <p><b>Remarks:</b> {trip.remarks || "—"}</p>
       </div>
+
+      {/* 🔐 ADMIN ONLY (UI only, backend later) */}
+      {isAdmin && (
+        <div style={card}>
+          <h4>Admin Actions</h4>
+          <button
+            style={editBtn}
+            onClick={() => alert("Edit Trip (STEP-6 backend)")}
+          >
+            Edit Trip
+          </button>
+        </div>
+      )}
     </>
   );
 }
@@ -48,4 +72,13 @@ const card = {
   borderRadius: "8px",
   marginTop: "15px",
   backgroundColor: "#ffffff"
+};
+
+const editBtn = {
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "8px 14px",
+  borderRadius: "6px",
+  cursor: "pointer"
 };

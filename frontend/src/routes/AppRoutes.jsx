@@ -34,18 +34,24 @@ export default function AppRoutes() {
       </Routes>
     );
   }
+/* ======================
+   👤 USER ROUTES (READ ONLY)
+   ====================== */
+if (role === "user") {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/trucks" />} />
 
-  /* ======================
-     👤 USER ROUTES
-     ====================== */
-  if (role === "user") {
-    return (
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    );
-  }
+      {/* READ ONLY ACCESS */}
+      <Route path="/trucks" element={<TruckList />} />
+      <Route path="/trucks/:truckNo" element={<TruckDetail />} />
+
+      {/* BLOCK OTHER ADMIN PAGES */}
+      <Route path="*" element={<Navigate to="/trucks" />} />
+    </Routes>
+  );
+}
+
 
   /* ======================
      🔐 ADMIN ROUTES
