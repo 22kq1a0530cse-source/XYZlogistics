@@ -1,78 +1,96 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const trucks = [
-  {
-    truck_no: "AP09AB1234",
-    driver: "D001",
-    safety: "Green",
-    trips: 120
-  },
-  {
-    truck_no: "TS10CD5678",
-    driver: "D002",
-    safety: "Yellow",
-    trips: 78
-  }
-];
+import { api } from "../services/api";
 
 export default function TruckList() {
-  const navigate = useNavigate();   // ✅ ADD THIS
+  const [trucks, setTrucks] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get("/trucks")
+      .then(res => setTrucks(res.data))
+      .catch(err => console.error(err));
+  }, []);
 
   return (
     <>
-      <h2>Truck List</h2>
+      <h2 style={titleStyle}>Truck List</h2>
 
-      <table style={tableStyle}>
-        <thead>
-          <tr>
-            <th style={thStyle}>Truck No</th>
-            <th style={thStyle}>Driver Assigned</th>
-            <th style={thStyle}>Safety Bucket</th>
-            <th style={thStyle}>Trip Count</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {trucks.map((truck, index) => (
-            <tr
-              key={index}
-              style={trStyle}
-              onClick={() => navigate(`/trucks/${truck.truck_no}`)} // ✅ ADD THIS
-            >
-              <td style={tdStyle}>{truck.truck_no}</td>
-              <td style={tdStyle}>{truck.driver}</td>
-              <td style={tdStyle}>{truck.safety}</td>
-              <td style={tdStyle}>{truck.trips}</td>
+      <div style={tableContainer}>
+        <table style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={thStyle}>Truck No</th>
+              <th style={thStyle}>Driver</th>
+              <th style={thStyle}>Safety</th>
+              <th style={thStyle}>Trips</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {trucks.map((t, i) => (
+              <tr
+                key={i}
+                style={rowStyle}
+                onClick={() => navigate(`/trucks/${t.truck_no}`)}
+              >
+                <td style={tdStyle}>{t.truck_no}</td>
+                <td style={tdStyle}>{t.driver_id}</td>
+                <td
+                  style={{
+                    ...tdStyle,
+                    fontWeight: "600",
+                    color:
+                      t.safety_bucket === "Green"
+                        ? "#15803d"
+                        : t.safety_bucket === "Yellow"
+                        ? "#a16207"
+                        : "#b91c1c"
+                  }}
+                >
+                  {t.safety_bucket}
+                </td>
+                <td style={tdStyle}>{t.trip_count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
 
-/* ---------- styles ---------- */
+/* ---------- Styles ---------- */
+
+const titleStyle = {
+  marginBottom: "16px"
+};
+
+const tableContainer = {
+  background: "#ffffff",
+  borderRadius: "8px",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+  overflowX: "auto"
+};
 
 const tableStyle = {
   width: "100%",
-  borderCollapse: "collapse",
-  marginTop: "20px",
-  backgroundColor: "#ffffff"
+  borderCollapse: "collapse"
 };
 
 const thStyle = {
-  border: "1px solid #ccc",
-  padding: "10px",
+  padding: "14px",
   backgroundColor: "#f1f5f9",
-  textAlign: "left"
+  textAlign: "left",
+  borderBottom: "2px solid #e5e7eb"
 };
 
 const tdStyle = {
-  border: "1px solid #ccc",
-  padding: "10px",
-  textAlign: "left"
+  padding: "12px",
+  borderBottom: "1px solid #e5e7eb"
 };
 
-const trStyle = {
-  cursor: "pointer"
+const rowStyle = {
+  cursor: "pointer",
+  transition: "background 0.2s"
 };
