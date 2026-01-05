@@ -1,80 +1,81 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import Home from "../pages/Home";
 import Login from "../pages/Login";
+import Register from "../pages/Register";
+import AdminLogin from "../pages/AdminLogin";
 
 import TruckList from "../pages/TruckList";
+import TruckDetail from "../pages/TruckDetail";
 import DriverList from "../pages/DriverList";
 import DriverDetail from "../pages/DriverDetail";
-import TruckDetail from "../pages/TruckDetail";
-
 import TripList from "../pages/TripList";
 import TripDetail from "../pages/TripDetail";
+import SafetyDashboard from "../pages/SafetyDashboard";
 import Attendance from "../pages/Attendance";
 import Salary from "../pages/Salary";
-import SafetyDashboard from "../pages/SafetyDashboard";
 
 export default function AppRoutes() {
   const role = localStorage.getItem("role");
 
+  console.log("ROUTE ROLE:", role);
+
+  /* ======================
+     🔓 PUBLIC ROUTES
+     ====================== */
+  if (!role) {
+    return (
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    );
+  }
+/* ======================
+   👤 USER ROUTES (READ ONLY)
+   ====================== */
+if (role === "user") {
   return (
     <Routes>
-      {/* ================= LOGIN ================= */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Navigate to="/trucks" />} />
 
-      {/* ================= ADMIN ONLY ================= */}
-      <Route
-        path="/dashboard/trucks"
-        element={role === "admin" ? <TruckList /> : <Navigate to="/login" />}
-      />
+      {/* READ ONLY ACCESS */}
+      <Route path="/trucks" element={<TruckList />} />
+      <Route path="/trucks/:truckNo" element={<TruckDetail />} />
 
-      {/* 🔥 ADDED: TRUCK DETAILS */}
-      <Route
-        path="/dashboard/trucks/:truckNo"
-        element={role === "admin" ? <TruckDetail /> : <Navigate to="/login" />}
-      />
-
-      <Route
-        path="/dashboard/drivers"
-        element={role === "admin" ? <DriverList /> : <Navigate to="/login" />}
-      />
-
-      {/* 🔥 ADDED: DRIVER DETAILS */}
-      <Route
-        path="/dashboard/drivers/:driverId"
-        element={role === "admin" ? <DriverDetail /> : <Navigate to="/login" />}
-      />
-
-      {/* ================= ADMIN + DRIVER ================= */}
-      <Route
-        path="/dashboard/trips"
-        element={role ? <TripList /> : <Navigate to="/login" />}
-      />
-
-      <Route
-        path="/dashboard/trips/:id"
-        element={role ? <TripDetail /> : <Navigate to="/login" />}
-      />
-
-      <Route
-        path="/dashboard/attendance"
-        element={role ? <Attendance /> : <Navigate to="/login" />}
-      />
-
-      <Route
-        path="/dashboard/salary"
-        element={role ? <Salary /> : <Navigate to="/login" />}
-      />
-
-      <Route
-        path="/dashboard/safety"
-        element={role ? <SafetyDashboard /> : <Navigate to="/login" />}
-      />
-
-      {/* ================= DEFAULT ================= */}
-      <Route
-        path="*"
-        element={<Navigate to={role ? "/dashboard/trips" : "/login"} />}
-      />
+      {/* BLOCK OTHER ADMIN PAGES */}
+      <Route path="*" element={<Navigate to="/trucks" />} />
     </Routes>
   );
+}
+
+
+  /* ======================
+     🔐 ADMIN ROUTES
+     ====================== */
+  if (role === "admin") {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/trucks" />} />
+
+        <Route path="/trucks" element={<TruckList />} />
+        <Route path="/trucks/:truckNo" element={<TruckDetail />} />
+
+        <Route path="/drivers" element={<DriverList />} />
+        <Route path="/drivers/:driverId" element={<DriverDetail />} />
+
+        <Route path="/trips" element={<TripList />} />
+        <Route path="/trips/:tripId" element={<TripDetail />} />
+
+        <Route path="/safety" element={<SafetyDashboard />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/salary" element={<Salary />} />
+
+        <Route path="*" element={<Navigate to="/trucks" />} />
+      </Routes>
+    );
+  }
 }

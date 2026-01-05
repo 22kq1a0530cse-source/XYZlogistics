@@ -1,130 +1,21 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { api } from "../services/api";
-
 export default function SafetyDashboard() {
-  const role = localStorage.getItem("role");
-  const isAdmin = role === "admin";
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-
-  const navigate = useNavigate();
-
-  const [safetyData, setSafetyData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // ADMIN FORM STATE
-  const [driverId, setDriverId] = useState("");
-  const [name, setName] = useState("");
-  const [overspeed, setOverspeed] = useState("");
-  const [score, setScore] = useState("");
-
-  // 🔐 PROTECT PAGE
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/");
-    }
-  }, [isLoggedIn, navigate]);
-
-  // 📡 FETCH SAFETY DATA
-  const fetchSafety = () => {
-    api
-      .get("/safety")
-      .then((res) => setSafetyData(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchSafety();
-  }, []);
-
-  // ➕ ADD SAFETY (ADMIN ONLY)
-  const handleAddSafety = () => {
-    if (!driverId || !name || !overspeed || !score) {
-      alert("Fill all fields");
-      return;
-    }
-
-    api
-      .post("/safety", {
-        driver_id: driverId,
-        name,
-        overspeed: Number(overspeed),
-        score: Number(score),
-        role
-      })
-      .then(() => {
-        setDriverId("");
-        setName("");
-        setOverspeed("");
-        setScore("");
-        fetchSafety();
-      })
-      .catch((err) =>
-        alert(err.response?.data?.message || "Failed to add safety record")
-      );
-  };
-
-  // 📊 SUMMARY VALUES
-  const totalDrivers = safetyData.length;
-  const totalOverspeed = safetyData.reduce((sum, d) => sum + d.overspeed, 0);
-  const safeDrivers = safetyData.filter((d) => d.score >= 80).length;
-  const highRiskDrivers = safetyData.filter((d) => d.score < 60).length;
+  const safetyData = [
+    { driver_id: "D001", name: "Ravi", overspeed: 2, score: 85, status: "Good" },
+    { driver_id: "D002", name: "Kumar", overspeed: 6, score: 65, status: "Warning" },
+    { driver_id: "D003", name: "Suresh", overspeed: 10, score: 45, status: "Critical" }
+  ];
 
   return (
     <>
       <h2>Safety & Over-Speed Dashboard</h2>
 
-      {/* 🔐 ADMIN ADD FORM */}
-      {isAdmin && (
-        <div style={formBox}>
-          <h4>Add Safety Record</h4>
-
-          <input
-            style={input}
-            placeholder="Driver ID"
-            value={driverId}
-            onChange={(e) => setDriverId(e.target.value)}
-          />
-
-          <input
-            style={input}
-            placeholder="Driver Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <input
-            style={input}
-            type="number"
-            placeholder="Over-speed Count"
-            value={overspeed}
-            onChange={(e) => setOverspeed(e.target.value)}
-          />
-
-          <input
-            style={input}
-            type="number"
-            placeholder="Safety Score"
-            value={score}
-            onChange={(e) => setScore(e.target.value)}
-          />
-
-          <button style={addBtn} onClick={handleAddSafety}>
-            + Add Safety
-          </button>
-        </div>
-      )}
-
-      {/* SUMMARY CARDS */}
       <div style={cardGrid}>
-        <SummaryCard title="Total Drivers" value={totalDrivers} />
-        <SummaryCard title="Over-speed Alerts" value={totalOverspeed} />
-        <SummaryCard title="Safe Drivers" value={safeDrivers} />
-        <SummaryCard title="High-Risk Drivers" value={highRiskDrivers} />
+        <SummaryCard title="Total Drivers" value="3" />
+        <SummaryCard title="Over-speed Alerts" value="18" />
+        <SummaryCard title="Safe Drivers" value="1" />
+        <SummaryCard title="High-Risk Drivers" value="1" />
       </div>
 
-      {/* TABLE */}
       <table style={tableStyle}>
         <thead>
           <tr>
@@ -135,34 +26,15 @@ export default function SafetyDashboard() {
             <th style={thStyle}>Status</th>
           </tr>
         </thead>
-
         <tbody>
-          {loading && (
-            <tr>
-              <td colSpan="5" style={tdStyle}>Loading...</td>
-            </tr>
-          )}
-
-          {!loading && safetyData.length === 0 && (
-            <tr>
-              <td colSpan="5" style={tdStyle}>No safety data</td>
-            </tr>
-          )}
-
           {safetyData.map((d, i) => (
             <tr key={i}>
               <td style={tdStyle}>{d.driver_id}</td>
               <td style={tdStyle}>{d.name}</td>
               <td style={tdStyle}>{d.overspeed}</td>
               <td style={tdStyle}>{d.score}</td>
-              <td
-                style={{
-                  ...tdStyle,
-                  fontWeight: "bold",
-                  color: statusColor(d.score)
-                }}
-              >
-                {statusText(d.score)}
+              <td style={{ ...tdStyle, fontWeight: "bold", color: statusColor(d.status) }}>
+                {d.status}
               </td>
             </tr>
           ))}
@@ -183,44 +55,7 @@ function SummaryCard({ title, value }) {
   );
 }
 
-const statusText = (score) => {
-  if (score >= 80) return "Good";
-  if (score >= 60) return "Warning";
-  return "Critical";
-};
-
-const statusColor = (score) => {
-  if (score >= 80) return "green";
-  if (score >= 60) return "orange";
-  return "red";
-};
-
 /* ---------- styles ---------- */
-
-const formBox = {
-  background: "#ffffff",
-  padding: "15px",
-  borderRadius: "8px",
-  marginBottom: "20px",
-  maxWidth: "400px"
-};
-
-const input = {
-  width: "100%",
-  padding: "8px",
-  marginBottom: "10pxtpx",
-  border: "1px solid #ccc",
-  borderRadius: "4px"
-};
-
-const addBtn = {
-  background: "#2563eb",
-  color: "#fff",
-  border: "none",
-  padding: "8px 14px",
-  borderRadius: "6px",
-  cursor: "pointer"
-};
 
 const cardGrid = {
   display: "grid",
@@ -252,4 +87,10 @@ const thStyle = {
 const tdStyle = {
   border: "1px solid #ccc",
   padding: "10px"
+};
+
+const statusColor = (status) => {
+  if (status === "Good") return "green";
+  if (status === "Warning") return "orange";
+  return "red";
 };

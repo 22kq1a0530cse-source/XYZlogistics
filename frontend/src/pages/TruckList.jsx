@@ -9,222 +9,148 @@ export default function TruckList() {
   const [trucks, setTrucks] = useState([]);
   const navigate = useNavigate();
 
-  // 🔐 BLOCK NON-ADMIN ACCESS
   useEffect(() => {
-    if (!role || role !== "admin") {
-      navigate("/login");
+    if (!role) {
+      navigate("/");
+      return;
     }
-  }, [role, navigate]);
 
-  // 🔹 ADMIN FORM STATE
-  const [form, setForm] = useState({
-    truck_no: "",
-    driver_id: "",
-    safety_bucket: "Green"
-  });
-
-  // 📡 FETCH TRUCKS (DEDUPLICATION ADDED)
-  const fetchTrucks = () => {
     api
       .get("/trucks")
-      .then((res) => {
-        const uniqueTrucks = Array.from(
-          new Map(res.data.map(t => [t.truck_no, t])).values()
-        );
-        setTrucks(uniqueTrucks);
-      })
-      .catch((err) => console.error(err));
-  };
-
-  useEffect(() => {
-    fetchTrucks();
-  }, []);
-
-  // ➕ ADD TRUCK (DUPLICATE BLOCK ADDED)
-  const handleAddTruck = () => {
-    if (!form.truck_no || !form.driver_id) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    const exists = trucks.some(
-      (t) => t.truck_no === form.truck_no
-    );
-
-    if (exists) {
-      alert("Truck number already exists");
-      return;
-    }
-
-    api
-      .post("/trucks", form)
-      .then(() => {
-        alert("Truck added successfully");
-        setForm({ truck_no: "", driver_id: "", safety_bucket: "Green" });
-        fetchTrucks();
-      })
-      .catch((err) => {
-        alert(err.response?.data?.message || "Failed to add truck");
-      });
-  };
-
-  // ❌ DELETE TRUCK
-  const handleDeleteTruck = (truckNo) => {
-    if (!window.confirm("Are you sure you want to delete this truck?")) return;
-
-    api
-      .delete(`/trucks/${truckNo}`)
-      .then(() => {
-        setTrucks(prev => prev.filter(t => t.truck_no !== truckNo));
-      })
-      .catch((err) => {
-        alert(err.response?.data?.message || "Delete failed");
-      });
-  };
+      .then(res => setTrucks(res.data))
+      .catch(err => console.error(err));
+  }, [role, navigate]);
 
   return (
     <>
-      <h2>Truck List</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+        <h2 style={titleStyle}>Truck List</h2>
 
-      {isAdmin && (
-        <div style={formBox}>
-          <input
-            placeholder="Truck No"
-            value={form.truck_no}
-            onChange={(e) => setForm({ ...form, truck_no: e.target.value })}
-          />
-
-          <input
-            placeholder="Driver ID"
-            value={form.driver_id}
-            onChange={(e) => setForm({ ...form, driver_id: e.target.value })}
-          />
-
-          <select
-            value={form.safety_bucket}
-            onChange={(e) => setForm({ ...form, safety_bucket: e.target.value })}
-          >
-            <option>Green</option>
-            <option>Yellow</option>
-            <option>Red</option>
-          </select>
-
-          <button style={addBtn} onClick={handleAddTruck}>
-            Add Truck
+        {/* ADMIN ONLY */}
+        {isAdmin && (
+          <button style={addBtn} onClick={() => navigate("/trucks/new")}>
+            + Add Truck
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
-      <table style={tableStyle}>
-        <thead>
-          <tr>
-            <th style={thStyle}>Truck No</th>
-            <th style={thStyle}>Driver ID</th>
-            <th style={thStyle}>Safety</th>
-            <th style={thStyle}>Trips</th>
-            {isAdmin && <th style={thStyle}>Actions</th>}
-          </tr>
-        </thead>
-
-        <tbody>
-          {trucks.length === 0 && (
+      <div style={tableContainer}>
+        <table style={tableStyle}>
+          <thead>
             <tr>
-              <td colSpan={isAdmin ? 5 : 4} style={tdStyle}>
-                No trucks available
-              </td>
-            </tr>
-          )}
+              <th style={thStyle}>Truck No</th>
+              <th style={thStyle}>Driver</th>
+              <th style={thStyle}>Safety</th>
+              <th style={thStyle}>Trips</th>
 
-          {trucks.map((truck, index) => (
-            <tr key={index} style={trStyle}>
-              <td
-                style={tdStyle}
-                onClick={() =>
-                  navigate(`/dashboard/trucks/${truck.truck_no}`)
-                }
-              >
-                {truck.truck_no}
-              </td>
-
-              <td
-                style={tdStyle}
-                onClick={() =>
-                  navigate(`/dashboard/drivers/${truck.driver_id}`)
-                }
-              >
-                {truck.driver_id}
-              </td>
-
-              <td
-                style={{
-                  ...tdStyle,
-                  fontWeight: "600",
-                  color:
-                    truck.safety_bucket === "Green"
-                      ? "green"
-                      : truck.safety_bucket === "Yellow"
-                      ? "orange"
-                      : "red"
-                }}
-              >
-                {truck.safety_bucket}
-              </td>
-
-              <td style={tdStyle}>{truck.trip_count}</td>
-
+              {/* ADMIN ONLY */}
               {isAdmin && (
-                <td style={tdStyle}>
-                  <button
-                    style={deleteBtn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTruck(truck.truck_no);
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              )}
+  <button
+    style={{
+      marginBottom: "15px",
+      background: "#2563eb",
+      color: "white",
+      border: "none",
+      padding: "8px 14px",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }}
+    onClick={() => alert("Add Truck (Admin only)")}
+  >
+    + Add Truck
+  </button>
+)}
+
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {trucks.map((t, i) => (
+              <tr key={i} style={rowStyle}>
+                <td
+                  style={tdStyle}
+                  onClick={() => navigate(`/trucks/${t.truck_no}`)}
+                >
+                  {t.truck_no}
+                </td>
+
+                <td style={tdStyle}>{t.driver_id}</td>
+
+                <td
+                  style={{
+                    ...tdStyle,
+                    fontWeight: "600",
+                    color:
+                      t.safety_bucket === "Green"
+                        ? "#15803d"
+                        : t.safety_bucket === "Yellow"
+                        ? "#a16207"
+                        : "#b91c1c"
+                  }}
+                >
+                  {t.safety_bucket}
+                </td>
+
+                <td style={tdStyle}>{t.trip_count}</td>
+
+                {/* ADMIN ONLY */}
+                {isAdmin && (
+                  <td style={tdStyle}>
+                    <button
+                      style={editBtn}
+                      onClick={() => navigate(`/trucks/${t.truck_no}/edit`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      style={deleteBtn}
+                      onClick={() => alert("Delete API later")}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
 
+/* ---------- Styles ---------- */
 
+const titleStyle = {
+  marginBottom: "16px"
+};
 
-/* ---------- styles (UNCHANGED) ---------- */
+const tableContainer = {
+  background: "#ffffff",
+  borderRadius: "8px",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+  overflowX: "auto"
+};
 
 const tableStyle = {
   width: "100%",
-  borderCollapse: "collapse",
-  marginTop: "20px",
-  backgroundColor: "#ffffff"
+  borderCollapse: "collapse"
 };
 
 const thStyle = {
-  border: "1px solid #ccc",
-  padding: "10px",
+  padding: "14px",
   backgroundColor: "#f1f5f9",
-  textAlign: "left"
+  textAlign: "left",
+  borderBottom: "2px solid #e5e7eb"
 };
 
 const tdStyle = {
-  border: "1px solid #ccc",
-  padding: "10px",
-  cursor: "pointer"
+  padding: "12px",
+  borderBottom: "1px solid #e5e7eb"
 };
 
-const trStyle = {
-  cursor: "pointer"
-};
-
-const formBox = {
-  display: "flex",
-  gap: "10px",
-  marginBottom: "20px"
+const rowStyle = {
+  transition: "background 0.2s"
 };
 
 const addBtn = {
@@ -233,6 +159,16 @@ const addBtn = {
   border: "none",
   padding: "8px 14px",
   borderRadius: "6px",
+  cursor: "pointer"
+};
+
+const editBtn = {
+  marginRight: "8px",
+  background: "#16a34a",
+  color: "#fff",
+  border: "none",
+  padding: "6px 10px",
+  borderRadius: "4px",
   cursor: "pointer"
 };
 

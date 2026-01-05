@@ -3,37 +3,52 @@ import heroImg from "./assets/hero.png";
 
 export default function Home() {
   const role = localStorage.getItem("role");
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
   const username = localStorage.getItem("username");
 
   return (
     <div style={page}>
+
       {/* NAVBAR */}
       <header style={nav}>
         <h2 style={logo}>XYZ LOGISTICS</h2>
 
         <div>
           {/* ===== BEFORE LOGIN ===== */}
-          {!isLoggedIn && (
+          {!role && (
             <>
-              <Link to="/login" style={navLink}>
+              <Link
+                to="/login"
+                style={navLink}
+                onMouseEnter={(e) => (e.target.style.color = "#2563eb")}
+                onMouseLeave={(e) => (e.target.style.color = "#e5e7eb")}
+              >
                 Login
               </Link>
 
-              <Link to="/register" style={navLink}>
+              <Link
+                to="/register"
+                style={navLink}
+                onMouseEnter={(e) => (e.target.style.color = "#2563eb")}
+                onMouseLeave={(e) => (e.target.style.color = "#e5e7eb")}
+              >
                 Register
+              </Link>
+
+              <Link to="/admin-login" style={navBtn}>
+                Admin
               </Link>
             </>
           )}
 
           {/* ===== AFTER LOGIN ===== */}
-          {isLoggedIn && (
+          {role && (
             <div style={userBox}>
               <span style={userText}>
                 👤 {username} {role === "admin" && "(Admin)"}
               </span>
 
-              <Link to="/dashboard/trucks" style={navBtn}>
+              {/* Dashboard for BOTH user & admin */}
+              <Link to="/trucks" style={navBtn}>
                 Dashboard
               </Link>
 
@@ -65,13 +80,13 @@ export default function Home() {
             fleet, drivers, trips, safety and payroll.
           </p>
 
-          {/* GET STARTED / DASHBOARD */}
-          {!isLoggedIn ? (
-            <Link to="/login" style={primaryBtn}>
+          {/* GET STARTED LOGIC */}
+          {!role ? (
+            <Link to="/register" style={primaryBtn}>
               Get Started
             </Link>
           ) : (
-            <Link to="/dashboard/trucks" style={primaryBtn}>
+            <Link to="/trucks" style={primaryBtn}>
               Go to Dashboard
             </Link>
           )}
@@ -98,7 +113,7 @@ export default function Home() {
   );
 }
 
-/* COMPONENT */
+/* COMPONENTS */
 function Feature({ title, icon }) {
   return (
     <div style={featureCard}>
@@ -112,6 +127,7 @@ function Feature({ title, icon }) {
 }
 
 /* ================= STYLES ================= */
+/* 🔽 ALL YOUR EXISTING STYLES – UNCHANGED 🔽 */
 
 const page = {
   fontFamily: "Inter, Arial, sans-serif",
@@ -119,6 +135,7 @@ const page = {
   background: "#ffffff"
 };
 
+/* NAV */
 const nav = {
   display: "flex",
   justifyContent: "space-between",
@@ -148,6 +165,7 @@ const navBtn = {
   fontWeight: "600"
 };
 
+/* 🔹 ADDED styles (minimal & required only) */
 const userBox = {
   display: "flex",
   alignItems: "center",
@@ -169,6 +187,7 @@ const logoutBtn = {
   cursor: "pointer"
 };
 
+/* HERO */
 const hero = {
   minHeight: "90vh",
   display: "flex",
@@ -213,6 +232,8 @@ const primaryBtn = {
   fontWeight: "700"
 };
 
+
+/* SECTIONS */
 const section = {
   padding: "90px 10%"
 };
@@ -223,6 +244,7 @@ const sectionTitle = {
   textAlign: "center"
 };
 
+/* FEATURES */
 const features = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -242,6 +264,50 @@ const featureIcon = {
   marginBottom: "14px"
 };
 
+/* TWO COLUMN */
+const twoCol = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "60px",
+  alignItems: "center"
+};
+
+const text = {
+  fontSize: "16px",
+  lineHeight: "1.8",
+  marginBottom: "20px"
+};
+
+const list = {
+  lineHeight: "2",
+  paddingLeft: "0",
+  listStyle: "none"
+};
+
+const image = {
+  width: "100%",
+  borderRadius: "16px"
+};
+
+/* STATS */
+const stats = {
+  background: "#020617",
+  color: "white",
+  display: "flex",
+  justifyContent: "space-around",
+  padding: "70px 10%",
+  textAlign: "center"
+};
+
+/* CTA */
+const cta = {
+  padding: "90px 10%",
+  textAlign: "center",
+  background: "#0f172a",
+  color: "white"
+};
+
+/* FOOTER */
 const footer = {
   background: "#020617",
   color: "#cbd5f5",

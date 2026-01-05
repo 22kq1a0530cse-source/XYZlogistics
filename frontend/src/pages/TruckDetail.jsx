@@ -1,6 +1,26 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { api } from "../services/api";
+import { useState } from "react";
+
+const truckData = {
+  AP09AB1234: {
+    truck_no: "AP09AB1234",
+    driver: "D001",
+    safety: "Green",
+    trips: 120,
+    pollution: "Valid",
+    rc: "Uploaded",
+    totalDistance: "45,000 km"
+  },
+  TS10CD5678: {
+    truck_no: "TS10CD5678",
+    driver: "D002",
+    safety: "Yellow",
+    trips: 78,
+    pollution: "Expired",
+    rc: "Pending",
+    totalDistance: "28,000 km"
+  }
+};
 
 export default function TruckDetail() {
   const { truckNo } = useParams();
@@ -12,61 +32,33 @@ export default function TruckDetail() {
   const [tab, setTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
 
-  // ✅ NEW STATE (API DATA)
-  const [truck, setTruck] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const truck = truckData[truckNo];
 
-  // 🔐 SAFE REDIRECT
-  useEffect(() => {
-    if (!role) {
-      navigate("/");
-    }
-  }, [role, navigate]);
+  if (!role) {
+    navigate("/");
+    return null;
+  }
 
-  // 📡 FETCH TRUCK DETAILS (NEW)
-  useEffect(() => {
-    api
-      .get(`/trucks/${truckNo}`)
-      .then((res) => {
-        setTruck(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-  }, [truckNo]);
-
-  if (loading) return <h3>Loading...</h3>;
-  if (!truck) return <h3>Truck not found</h3>;
-
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this truck?")) {
-      api.delete(`/trucks/${truckNo}`).then(() => {
-        navigate("/dashboard/trucks");
-      });
-    }
-  };
+  if (!truck) {
+    return <h3>Truck not found</h3>;
+  }
 
   return (
     <>
-      {/* HEADER */}
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h2>Truck Details</h2>
 
-        {isAdmin && (
-          <div>
-            <button style={editBtn} onClick={() => setEditMode(!editMode)}>
-              {editMode ? "Cancel Edit" : "Edit Truck"}
-            </button>
+        {/* ADMIN ONLY */}
+       {isAdmin && (
+  <div style={{ marginBottom: "15px" }}>
+    <button style={editBtn}>Edit Truck</button>
+    <button style={deleteBtn}>Delete Truck</button>
+  </div>
+)}
 
-            <button style={deleteBtn} onClick={handleDelete}>
-              Delete Truck
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* TABS */}
+      {/* Tabs */}
       <div style={tabBar}>
         <button style={tabBtn(tab === "overview")} onClick={() => setTab("overview")}>
           Overview
@@ -86,19 +78,19 @@ export default function TruckDetail() {
 
           <p>
             <b>Driver Assigned:</b>{" "}
-            {editMode ? <input defaultValue={truck.driver_id} /> : truck.driver_id}
+            {editMode ? <input defaultValue={truck.driver} /> : truck.driver}
           </p>
 
           <p>
             <b>Safety Bucket:</b>{" "}
             {editMode ? (
-              <select defaultValue={truck.safety_bucket}>
+              <select defaultValue={truck.safety}>
                 <option>Green</option>
                 <option>Yellow</option>
                 <option>Red</option>
               </select>
             ) : (
-              truck.safety_bucket
+              truck.safety
             )}
           </p>
         </div>
@@ -107,20 +99,27 @@ export default function TruckDetail() {
       {/* DOCUMENTS */}
       {tab === "documents" && (
         <div style={card}>
-          <p><b>Pollution Certificate:</b> {truck.pollution || "N/A"}</p>
-          <p><b>RC Status:</b> {truck.rc || "N/A"}</p>
+          <p>
+            <b>Pollution Certificate:</b>{" "}
+            {editMode ? <input defaultValue={truck.pollution} /> : truck.pollution}
+          </p>
+
+          <p>
+            <b>RC Status:</b>{" "}
+            {editMode ? <input defaultValue={truck.rc} /> : truck.rc}
+          </p>
         </div>
       )}
 
       {/* TRIPS */}
       {tab === "trips" && (
         <div style={card}>
-          <p><b>Total Trips:</b> {truck.trip_count}</p>
-          <p><b>Total Distance Covered:</b> {truck.totalDistance || "N/A"}</p>
+          <p><b>Total Trips:</b> {truck.trips}</p>
+          <p><b>Total Distance Covered:</b> {truck.totalDistance}</p>
         </div>
       )}
 
-      {/* SAVE */}
+      {/* ADMIN SAVE */}
       {isAdmin && editMode && (
         <button style={saveBtn} onClick={() => alert("Save API next step")}>
           Save Changes
@@ -129,9 +128,6 @@ export default function TruckDetail() {
     </>
   );
 }
-
-
-
 
 /* ---------- styles ---------- */
 
@@ -159,16 +155,6 @@ const card = {
 
 const editBtn = {
   background: "#2563eb",
-  color: "#fff",
-  border: "none",
-  padding: "6px 12px",
-  borderRadius: "6px",
-  cursor: "pointer",
-  marginRight: "10px"
-};
-
-const deleteBtn = {
-  background: "#dc2626",
   color: "#fff",
   border: "none",
   padding: "6px 12px",

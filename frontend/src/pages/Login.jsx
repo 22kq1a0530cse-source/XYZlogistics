@@ -1,72 +1,50 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleLogin = () => {
     setError("");
 
-    const cleanUsername = username.trim();
-    const cleanPassword = password.trim();
-
-    if (!cleanUsername || !cleanPassword) {
-      setError("Please enter username and password");
-      return;
-    }
-
     api
-      .post("/login", {
-        username: cleanUsername,
-        password: cleanPassword
-      })
+      .post("/login", { username, password })
       .then((res) => {
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("role", res.data.role);
         localStorage.setItem("username", res.data.username);
-
-        if (res.data.role === "admin") {
-          navigate("/dashboard/trucks");
-        } else {
-          navigate("/dashboard/trips");
-        }
+        window.location.href = "/";
       })
-      .catch((err) => {
-        setError(err.response?.data?.message || "Invalid credentials");
+      .catch(() => {
+        setError("Invalid username or password");
       });
-  };
+  }; // ✅ THIS WAS MISSING
 
   return (
     <div style={page}>
-      {/* background shapes */}
-      <div style={blobLeft}></div>
-      <div style={blobRight}></div>
-
       <div style={card}>
-        {/* avatar */}
-        <div style={avatarWrap}>
-          <div style={avatarCircle}></div>
+        {/* Avatar */}
+        <div style={avatarBox}>
+          <div style={avatar}>👤</div>
         </div>
 
         <h2 style={title}>Sign In</h2>
 
         {/* Username */}
-        <div style={inputWrap}>
+        <div style={inputWrapper}>
           <span style={icon}>👤</span>
           <input
             style={input}
-            placeholder="Username / Driver ID"
+            placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
 
         {/* Password */}
-        <div style={inputWrap}>
+        <div style={inputWrapper}>
           <span style={icon}>🔒</span>
           <input
             style={input}
@@ -79,7 +57,7 @@ export default function Login() {
 
         {error && <p style={errorText}>{error}</p>}
 
-        <button style={btn} onClick={handleLogin}>
+        <button style={loginBtn} onClick={handleLogin}>
           LOGIN
         </button>
 
@@ -89,144 +67,103 @@ export default function Login() {
           </label>
           <span style={forgot}>Forgot password?</span>
         </div>
-
-        <p style={demo}>
-          Admin: admin / admin123 <br />
-          Driver: D001 / 1234
-        </p>
       </div>
     </div>
   );
 }
 
-/* ================= STYLES ================= */
+/* ===================== STYLES ===================== */
 
 const page = {
   height: "100vh",
-  background: "linear-gradient(135deg, #2fbf9f, #1fa0c9)",
   display: "flex",
-  alignItems: "center",
   justifyContent: "center",
-  position: "relative",
-  overflow: "hidden",
-  fontFamily: "Inter, sans-serif"
-};
-
-const blobLeft = {
-  position: "absolute",
-  width: "420px",
-  height: "420px",
-  background: "#33d1a7",
-  borderRadius: "50%",
-  bottom: "-140px",
-  left: "-140px",
-  opacity: 0.8
-};
-
-const blobRight = {
-  position: "absolute",
-  width: "360px",
-  height: "360px",
-  background: "#3bb8e5",
-  borderRadius: "50%",
-  top: "-120px",
-  right: "-120px",
-  opacity: 0.8
+  alignItems: "center",
+  background: "linear-gradient(135deg, #e0f2fe, #2563eb)"
 };
 
 const card = {
-  width: "340px",
-  padding: "34px 26px",
-  borderRadius: "22px",
-  background: "rgba(255,255,255,0.25)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
-  boxShadow: "0 30px 60px rgba(0,0,0,0.25)",
+  width: "360px",
+  background: "#ffffff",
+  borderRadius: "20px",
+  padding: "40px 30px",
   textAlign: "center",
-  position: "relative",
-  zIndex: 2
+  boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
 };
 
-const avatarWrap = {
-  width: "90px",
-  height: "90px",
-  margin: "0 auto 14px",
-  borderRadius: "18px",
-  background: "rgba(255,255,255,0.35)",
+const avatarBox = {
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center"
+  justifyContent: "center",
+  marginBottom: "10px"
 };
 
-const avatarCircle = {
-  width: "42px",
-  height: "42px",
+const avatar = {
+  width: "70px",
+  height: "70px",
   borderRadius: "50%",
-  background: "#0f766e"
+  background: "#2563eb",
+  color: "#ffffff",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  fontSize: "32px"
 };
 
 const title = {
-  color: "#ffffff",
-  fontWeight: "500",
-  marginBottom: "18px"
+  marginBottom: "25px",
+  color: "#2563eb"
 };
 
-const inputWrap = {
+const inputWrapper = {
   display: "flex",
   alignItems: "center",
-  background: "rgba(255,255,255,0.9)",
-  borderRadius: "12px",
-  padding: "0 14px",
-  marginBottom: "14px"
+  background: "#f1f5f9",
+  borderRadius: "30px",
+  padding: "10px 15px",
+  marginBottom: "15px"
 };
 
 const icon = {
   marginRight: "10px",
-  fontSize: "16px"
+  fontSize: "18px"
 };
 
 const input = {
-  flex: 1,
-  height: "44px",
   border: "none",
   outline: "none",
   background: "transparent",
+  width: "100%",
   fontSize: "14px"
 };
 
-const btn = {
+const loginBtn = {
   width: "100%",
-  height: "46px",
-  borderRadius: "12px",
-  border: "none",
-  background: "linear-gradient(90deg, #0f766e, #0ea5a5)",
+  padding: "12px",
+  marginTop: "10px",
+  background: "#2563eb",
   color: "#ffffff",
-  fontSize: "15px",
-  fontWeight: "600",
+  border: "none",
+  borderRadius: "30px",
+  fontWeight: "bold",
   cursor: "pointer",
-  marginTop: "6px"
+  fontSize: "15px"
 };
 
 const footer = {
   display: "flex",
   justifyContent: "space-between",
-  marginTop: "14px",
+  marginTop: "15px",
   fontSize: "12px",
-  color: "#e5e7eb"
+  color: "#555"
 };
 
 const forgot = {
-  cursor: "pointer"
+  cursor: "pointer",
+  color: "#2563eb"
 };
 
 const errorText = {
-  color: "#fee2e2",
+  color: "red",
   fontSize: "13px",
-  marginBottom: "6px"
-};
-
-const demo = {
-  marginTop: "12px",
-  fontSize: "11px",
-  color: "#e5e7eb"
+  marginBottom: "10px"
 };

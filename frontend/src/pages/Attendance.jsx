@@ -1,31 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+
+const attendanceData = [
+  { driver_id: "D001", name: "Ravi", presentDays: 26, absentDays: 4 },
+  { driver_id: "D002", name: "Kumar", presentDays: 22, absentDays: 8 },
+  { driver_id: "D003", name: "Suresh", presentDays: 18, absentDays: 12 }
+];
 
 export default function Attendance() {
   const role = localStorage.getItem("role");
   const isAdmin = role === "admin";
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
   const navigate = useNavigate();
 
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  // 🔐 Block guest access
   useEffect(() => {
-    if (!isLoggedIn) navigate("/");
-  }, [isLoggedIn, navigate]);
-
-  useEffect(() => {
-    api.get("/attendance")
-      .then(res => setAttendanceData(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+    if (!role) {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
   return (
     <>
       <h2>Driver Attendance</h2>
 
+      {/* 🔐 ADMIN CONTROLS (future use) */}
       {isAdmin && (
         <div style={adminBar}>
           <button style={editBtn}>Edit Attendance</button>
@@ -42,14 +40,6 @@ export default function Attendance() {
           </tr>
         </thead>
         <tbody>
-          {loading && (
-            <tr><td colSpan="4" style={tdStyle}>Loading...</td></tr>
-          )}
-
-          {!loading && attendanceData.length === 0 && (
-            <tr><td colSpan="4" style={tdStyle}>No attendance data</td></tr>
-          )}
-
           {attendanceData.map((a, i) => (
             <tr key={i}>
               <td style={tdStyle}>{a.driver_id}</td>
@@ -64,11 +54,29 @@ export default function Attendance() {
   );
 }
 
-/* styles unchanged */
-const tableStyle = { width: "100%", borderCollapse: "collapse", marginTop: "20px" };
-const thStyle = { border: "1px solid #ccc", padding: "10px", background: "#f1f5f9" };
-const tdStyle = { border: "1px solid #ccc", padding: "10px" };
-const adminBar = { marginBottom: "10px" };
+/* styles (UNCHANGED) */
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: "20px"
+};
+
+const thStyle = {
+  border: "1px solid #ccc",
+  padding: "10px",
+  background: "#f1f5f9"
+};
+
+const tdStyle = {
+  border: "1px solid #ccc",
+  padding: "10px"
+};
+
+/* admin UI (isolated) */
+const adminBar = {
+  marginBottom: "10px"
+};
+
 const editBtn = {
   background: "#2563eb",
   color: "#fff",

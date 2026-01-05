@@ -5,105 +5,76 @@ import { api } from "../services/api";
 export default function TripDetail() {
   const role = localStorage.getItem("role");
   const isAdmin = role === "admin";
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   const { tripId } = useParams();
   const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
 
-  // 🔐 BLOCK ONLY IF NOT LOGGED IN
+  // 🔐 block guest
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!role) {
       navigate("/");
     }
-  }, [isLoggedIn, navigate]);
+  }, [role, navigate]);
 
   useEffect(() => {
-    api
-      .get(`/trips/${tripId}`)
-      .then((res) => setTrip(res.data))
-      .catch(() => alert("Trip not found"));
+    api.get(`/trips/${tripId}`)
+      .then(res => setTrip(res.data))
+      .catch(err => console.error(err));
   }, [tripId]);
 
   if (!trip) {
     return <h3>Loading trip details...</h3>;
   }
 
-  const avgSpeed =
-    trip.distance_km && trip.duration_hours
-      ? (trip.distance_km / trip.duration_hours).toFixed(2)
-      : "—";
-
   return (
     <>
-      <h2>Trip Details – {trip.trip_id}</h2>
+      <h2>Trip Details</h2>
 
-      <table style={tableStyle}>
-        <tbody>
-          <tr><th style={thStyle}>Trip ID</th><td style={tdStyle}>{trip.trip_id}</td></tr>
-          <tr><th style={thStyle}>Truck No</th><td style={tdStyle}>{trip.truck_no}</td></tr>
-          <tr><th style={thStyle}>Driver ID</th><td style={tdStyle}>{trip.driver_id}</td></tr>
-          <tr><th style={thStyle}>Distance</th><td style={tdStyle}>{trip.distance_km} km</td></tr>
-          <tr><th style={thStyle}>Duration</th><td style={tdStyle}>{trip.duration_hours} hrs</td></tr>
-          <tr><th style={thStyle}>Average Speed</th><td style={tdStyle}>{avgSpeed} km/h</td></tr>
-          <tr>
-            <th style={thStyle}>Over-speed</th>
-            <td style={{ ...tdStyle, color: trip.overspeed ? "red" : "green" }}>
-              {trip.overspeed ? "Yes" : "No"}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div style={card}>
+        <p><b>Trip ID:</b> {trip.trip_id}</p>
+        <p><b>Truck No:</b> {trip.truck_no}</p>
+        <p><b>Driver ID:</b> {trip.driver_id}</p>
+      </div>
 
-      <button style={backBtn} onClick={() => navigate("/dashboard/trips")}>
-        ← Back to Trips
-      </button>
+      <div style={card}>
+        <p><b>Distance:</b> {trip.distance_km} km</p>
+        <p><b>Duration:</b> {trip.duration_hours} hrs</p>
+        <p><b>Average Speed:</b> {trip.avg_speed || "—"} km/h</p>
+      </div>
 
+      <div style={card}>
+        <p><b>Over-speed:</b> {trip.overspeed ? "Yes" : "No"}</p>
+        <p><b>Remarks:</b> {trip.remarks || "—"}</p>
+      </div>
+
+      {/* 🔐 ADMIN ONLY (UI only, backend later) */}
       {isAdmin && (
-        <button style={editBtn} onClick={() => alert("Edit Trip (next step)")}>
-          Edit Trip
-        </button>
+        <div style={card}>
+          <h4>Admin Actions</h4>
+          <button
+            style={editBtn}
+            onClick={() => alert("Edit Trip (STEP-6 backend)")}
+          >
+            Edit Trip
+          </button>
+        </div>
       )}
     </>
   );
 }
 
-/* ================= STYLES ================= */
+/* ---------- styles (UNCHANGED) ---------- */
 
-const tableStyle = {
-  width: "100%",
-  maxWidth: "500px",
-  borderCollapse: "collapse",
-  background: "#fff",
-  marginTop: "15px"
-};
-
-const thStyle = {
-  textAlign: "left",
-  padding: "10px",
+const card = {
   border: "1px solid #e5e7eb",
-  background: "#f1f5f9",
-  width: "40%"
-};
-
-const tdStyle = {
-  padding: "10px",
-  border: "1px solid #e5e7eb"
-};
-
-const backBtn = {
+  padding: "15px",
+  borderRadius: "8px",
   marginTop: "15px",
-  marginRight: "10px",
-  background: "#6b7280",
-  color: "#fff",
-  border: "none",
-  padding: "8px 14px",
-  borderRadius: "6px",
-  cursor: "pointer"
+  backgroundColor: "#ffffff"
 };
 
 const editBtn = {
-  marginTop: "15px",
   background: "#2563eb",
   color: "#fff",
   border: "none",
